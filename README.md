@@ -8,7 +8,7 @@ This project provides **user authentication, role-based access control (RBAC), J
 
 ###  Clone the Repository
 ```sh
-git clone https://github.com/your-repo/ip-management-system.git
+git clone https://github.com/sirine-sudo/IP-backend.git
 cd ip-management-system/ip-backend
 ```
 
