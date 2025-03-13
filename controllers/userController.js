@@ -4,7 +4,6 @@ const asyncHandler = require("express-async-handler");
 const pool = require("../config/db");
 const crypto = require("crypto");
 const sendResetEmail = require("../config/email");
-
 const forgotPassword = asyncHandler(async (req, res) => {
     const { email } = req.body;
     const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -35,6 +34,7 @@ const generateRefreshToken = (user) => {
     return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 };
 
+// c est un testt
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
@@ -137,5 +137,18 @@ const resetPassword = asyncHandler(async (req, res) => {
     res.json({ message: "Mot de passe réinitialisé avec succès" });
 });
 
+ 
 
-module.exports = { registerUser, loginUser,refreshToken,forgotPassword ,resetPassword};
+const getUserProfile = asyncHandler(async (req, res) => {
+    const user = await pool.query("SELECT id, name, email, role FROM users WHERE id = $1", [req.user.id]);
+
+    if (user.rows.length > 0) {
+        res.json(user.rows[0]);
+    } else {
+        res.status(404).json({ message: "User not found" });
+    }
+});
+
+module.exports = { getUserProfile, registerUser, loginUser, refreshToken, forgotPassword, resetPassword };
+
+module.exports = { registerUser, loginUser,refreshToken,forgotPassword ,resetPassword ,getUserProfile};
