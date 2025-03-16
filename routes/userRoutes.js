@@ -1,14 +1,15 @@
 const express = require("express");
-const { registerUser, loginUser, refreshToken, forgotPassword, resetPassword, getUserProfile } = require("../controllers/userController");
+const { registerUser, loginUser,logoutUser, refreshToken, forgotPassword, resetPassword, getUserProfile } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.post("/logout", logoutUser);
 router.post("/refresh-token", refreshToken);
 
-// 🔹 Fix: Ensure `protect` is correctly passed as a middleware
+//  Fix: Ensure `protect` is correctly passed as a middleware
 router.get("/profile", protect, getUserProfile); 
 
 // Routes protégées
