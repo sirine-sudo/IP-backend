@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs"); 
-
+const pool = require("../config/db"); 
 const {
     generateAccessToken,
     generateRefreshToken,
