@@ -35,10 +35,16 @@ const registerUser = asyncHandler(async (req, res) => {
 
 //   Login User
 const loginUser = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, ethereum_address } = req.body;
     const user = await findUserByEmail(email);
+
     if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Check Ethereum address if provided
+    if (user.ethereum_address && ethereum_address && user.ethereum_address !== ethereum_address) {
+        return res.status(403).json({ message: "Ethereum address mismatch!" });
     }
 
     const accessToken = generateAccessToken(user);
@@ -50,6 +56,7 @@ const loginUser = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        ethereum_address: user.ethereum_address,
         accessToken,
         refreshToken,
     });
@@ -121,5 +128,18 @@ const logoutUser = asyncHandler(async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
+const connectWallet = asyncHandler(async (req, res) => {
+    const { ethereum_address } = req.body;
+    const userId = req.user.id;
 
-module.exports = { registerUser, loginUser, refreshToken, forgotPassword, resetPassword, getUserProfile, logoutUser };
+    if (!ethereum_address) {
+        return res.status(400).json({ message: "Ethereum address is required" });
+    }
+
+    // Update user with Ethereum address
+    await pool.query("UPDATE users SET ethereum_address = $1 WHERE id = $2", [ethereum_address, userId]);
+
+    res.status(200).json({ message: "Ethereum wallet linked successfully!" });
+});
+
+module.exports = {  registerUser, loginUser, refreshToken, forgotPassword, resetPassword, getUserProfile, logoutUser ,connectWallet };

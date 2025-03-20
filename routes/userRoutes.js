@@ -3,6 +3,9 @@ const { registerUser, loginUser,logoutUser, refreshToken, forgotPassword, resetP
 const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
+const { connectWallet } = require("../controllers/userController");
+
+router.post("/connect-wallet", protect, connectWallet);
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
