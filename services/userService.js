@@ -5,7 +5,7 @@ const crypto = require("crypto");
 
 //   Generate Access Token (15 min expiry)
 const generateAccessToken = (user) => {
-    return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "15m" });
+    return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "4h" });
 };
 
 //   Generate Refresh Token (7 days expiry)

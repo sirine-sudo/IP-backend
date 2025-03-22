@@ -9,9 +9,11 @@ const createUserTable = async () => {
             password VARCHAR(255) NOT NULL,
             role VARCHAR(50) DEFAULT 'simple-user',
             refresh_token TEXT,
+            ethereum_address VARCHAR(255), 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
 };
+
 
 module.exports = createUserTable;

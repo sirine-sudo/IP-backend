@@ -107,13 +107,22 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 //   Get User Profile
-const getUserProfile = asyncHandler(async (req, res) => {
-    const user = await pool.query("SELECT id, name, email, role FROM users WHERE id = $1", [req.user.id]);
+const getUserProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await pool.query("SELECT id, name, email, role, ethereum_address FROM users WHERE id = $1", [userId]);
 
-    if (user.rows.length === 0) return res.status(404).json({ message: "User not found" });
+        if (user.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-    res.json(user.rows[0]);
-});
+        res.json(user.rows[0]); // 🔹 Send ethereum_address in response
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 
 //   Logout User
 const logoutUser = asyncHandler(async (req, res) => {
