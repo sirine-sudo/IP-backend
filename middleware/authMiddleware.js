@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
-const pool = require("../config/db");
+const { User } = require("../models"); // ✅ Sequelize Model
 
 const protect = asyncHandler(async (req, res, next) => {
     let token = req.headers.authorization;
@@ -9,14 +9,18 @@ const protect = asyncHandler(async (req, res, next) => {
         try {
             token = token.split(" ")[1]; // Remove "Bearer " prefix
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            
-            const user = await pool.query("SELECT id, name, email, role FROM users WHERE id = $1", [decoded.id]);
-            
-            if (user.rows.length === 0) {
+
+            // 🔥 Utilisation de Sequelize au lieu de pool.query()
+            const user = await User.findOne({
+                where: { id: decoded.id },
+                attributes: ["id", "name", "email", "role"], // Sélectionner les champs nécessaires
+            });
+
+            if (!user) {
                 return res.status(401).json({ message: "User not found" });
             }
 
-            req.user = user.rows[0]; // Attach user data to request
+            req.user = user; // Attacher l'utilisateur à la requête
             next();
         } catch (error) {
             console.error("Token validation failed:", error);

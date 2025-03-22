@@ -1,6 +1,8 @@
 const asyncHandler = require("express-async-handler");
-const bcrypt = require("bcryptjs"); 
-const pool = require("../config/db"); 
+const jwt = require("jsonwebtoken");
+ const { User } = require("../models"); // ✅ Sequelize Model
+const bcrypt = require("bcryptjs");
+ 
 const {
     generateAccessToken,
     generateRefreshToken,
@@ -36,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
 //   Login User
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password, ethereum_address } = req.body;
-    const user = await findUserByEmail(email);
+    const user = await User.findOne({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(400).json({ message: "Invalid credentials" });
@@ -49,7 +51,9 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
+  
     await updateRefreshToken(user.id, refreshToken);
+
 
     res.json({
         _id: user.id,
@@ -64,19 +68,29 @@ const loginUser = asyncHandler(async (req, res) => {
 
 //   Refresh Token
 const refreshToken = asyncHandler(async (req, res) => {
-    const { token } = req.body;
-    if (!token) return res.status(401).json({ message: "No refresh token provided" });
+    try {
+        const { token } = req.body;
+        if (!token) return res.status(401).json({ message: "No refresh token provided" });
 
-    const user = await findUserByEmail(token);
-    if (!user) return res.status(403).json({ message: "Invalid refresh token" });
+        const user = await User.findOne({
+            where: { refresh_token: token },
+            attributes: ["id", "name", "email", "password", "role", "ethereum_address", "createdAt", "updatedAt", "refresh_token"]
+        });
+        
+        if (!user) return res.status(403).json({ message: "Invalid refresh token" });
 
-    jwt.verify(token, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
-        if (err) return res.status(403).json({ message: "Invalid refresh token" });
+        jwt.verify(token, process.env.JWT_REFRESH_SECRET, async (err, decoded) => {
+            if (err) return res.status(403).json({ message: "Invalid refresh token" });
 
-        const accessToken = generateAccessToken(decoded);
-        res.json({ accessToken });
-    });
+            const accessToken = generateAccessToken(user);
+            res.json({ accessToken });
+        });
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 });
+
 
 //   Forgot Password
 const forgotPassword = asyncHandler(async (req, res) => {
@@ -93,7 +107,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 //   Reset Password
 const resetPassword = asyncHandler(async (req, res) => {
     const { token, newPassword } = req.body;
-    const user = await pool.query("SELECT * FROM users WHERE reset_token = $1 AND reset_expires > NOW()", [token]);
+    const user = await User.findOne({ where: { reset_token: token, reset_expires: { [Op.gt]: new Date() } } });
 
     if (user.rows.length === 0) return res.status(400).json({ message: "Token invalid or expired" });
 
@@ -110,8 +124,10 @@ const resetPassword = asyncHandler(async (req, res) => {
 const getUserProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await pool.query("SELECT id, name, email, role, ethereum_address FROM users WHERE id = $1", [userId]);
-
+        const user = await User.findByPk(userId, {
+            attributes: ["id", "name", "email", "role", "ethereum_address"],
+        });
+        
         if (user.rows.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }
