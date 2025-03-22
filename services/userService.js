@@ -15,19 +15,36 @@ const generateRefreshToken = (user) => {
 };
 
 //   Register a new user
-const registerUserService = async (name, email, password, role) => {
-    const userExists = await User.findOne({ where: { email } });
-    if (userExists) throw new Error("User already exists");
+const registerUserService = async ({ name, email, password, role }) => {
+    // Vérification des paramètres
+    if (!name || !email || !password || !role) {
+        throw new Error("Tous les champs (name, email, password, role) sont requis.");
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
-        name,
-        email,
-        password: hashedPassword,
-        role: role || "simple-user",
-    });
+    try {
+        // Vérifier si l'utilisateur existe déjà
+        const existingUser = await User.findOne({ where: { email } });
 
-    return newUser;
+        if (existingUser) {
+            throw new Error("L'utilisateur avec cet email existe déjà. Veuillez utiliser un autre email.");
+        }
+
+        // Hasher le mot de passe
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Créer l'utilisateur
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            role,
+        });
+
+        return newUser;
+    } catch (error) {
+        console.error("Erreur lors de l'enregistrement de l'utilisateur :", error.message);
+        throw new Error(error.message || "Une erreur est survenue lors de l'inscription.");
+    }
 };
 
 // Trouver un utilisateur par email avec Sequelize

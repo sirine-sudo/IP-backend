@@ -16,23 +16,29 @@ const sendResetEmail = require("../config/email");
 
 //   Register User
 const registerUser = asyncHandler(async (req, res) => {
+    console.log("Request Body:", req.body); // Debugging
+
     const { name, email, password, role } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ message: "Please add all fields" });
 
-    const newUser = await registerUserService(name, email, password, role);
+    if (!name || !email || !password || !role) {
+        return res.status(400).json({ message: "Tous les champs (name, email, password, role) sont requis." });
+    }
 
-    const accessToken = generateAccessToken(newUser);
-    const refreshToken = generateRefreshToken(newUser);
-    await updateRefreshToken(newUser.id, refreshToken);
+    try {
+        const user = await registerUserService({ name, email, password, role });
 
-    res.status(201).json({
-        _id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        accessToken,
-        refreshToken,
-    });
+        res.status(201).json({
+            message: "Utilisateur créé avec succès.",
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 });
 
 //   Login User
