@@ -16,8 +16,7 @@ const sendResetEmail = require("../config/email");
 
 //   Register User
 const registerUser = asyncHandler(async (req, res) => {
-    console.log("Request Body:", req.body); // Debugging
-
+ 
     const { name, email, password, role } = req.body;
 
     if (!name || !email || !password || !role) {
@@ -129,19 +128,21 @@ const resetPassword = asyncHandler(async (req, res) => {
 //   Get User Profile
 const getUserProfile = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const user = await User.findByPk(userId, {
-            attributes: ["id", "name", "email", "role", "ethereum_address"],
-        });
-        
-        if (user.rows.length === 0) {
+        const userId = req.user?.id; // Vérifie si req.user est défini
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const user = await User.findOne({ where: { id: userId } });
+
+        if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        res.json(user.rows[0]); // 🔹 Send ethereum_address in response
+        res.json(user);
     } catch (error) {
-        console.error("Error fetching user profile:", error);
-        res.status(500).json({ message: "Server error" });
+        console.error("Error fetching user profile:", error.message);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -172,5 +173,6 @@ const connectWallet = asyncHandler(async (req, res) => {
 
     res.status(200).json({ message: "Ethereum wallet linked successfully!" });
 });
+
 
 module.exports = {  registerUser, loginUser, refreshToken, forgotPassword, resetPassword, getUserProfile, logoutUser ,connectWallet };

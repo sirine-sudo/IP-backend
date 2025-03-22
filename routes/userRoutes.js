@@ -7,6 +7,7 @@ const { connectWallet } = require("../controllers/userController");
 
 router.post("/connect-wallet", protect, connectWallet);
 
+ 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);
