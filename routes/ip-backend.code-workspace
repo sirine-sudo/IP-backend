@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../ip-management-frontend"
+		},
+		{
+			"path": "../../ip-nft"
+		}
+	]
+}
