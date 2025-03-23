@@ -2,41 +2,29 @@ const IP = require("../models/IP");
 
 const createIP = async function createIP(ipData) {
   try {
-    console.log("Received data in service:", ipData);
-    console.log("Data object keys:", Object.keys(ipData || {}));
+    const { title, description, type } = req.body;
+    const file = req.file; // Assurez-vous que Multer est bien configuré pour gérer le fichier
 
-    if (!ipData) {
-      throw new Error("Le corps de la requête est vide.");
+    if (!title || !description || !type || !file) {
+        return res.status(400).json({ error: "Tous les champs sont obligatoires" });
     }
 
-    const { title, description, type, ipfs_cid, file_url, creator_id, owner_address, nft_token_id, royalty_percentage, views } = ipData;
-
-    if (!title) throw new Error("Le titre est requis.");
-    if (!type) throw new Error("Le type est requis.");
-    if (!ipfs_cid) throw new Error("L'IPFS CID est requis.");
-    if (!file_url) throw new Error("L'URL du fichier est requise.");
-    if (!creator_id) throw new Error("L'ID du créateur est requis.");
-    if (!owner_address) throw new Error("L'adresse du propriétaire est requise.");
-    if (!nft_token_id) throw new Error("L'ID du token NFT est requis.");
-
     const newIP = await IP.create({
-      title,
-      description,
-      type,
-      ipfs_cid,
-      file_url,
-      creator_id,
-      owner_address,
-      nft_token_id,
-      royalty_percentage,
-      views
+        title,
+        description,
+        type,
+        ipfs_cid: "to-be-generated", // Ajoutez une valeur temporaire ou une vraie CID
+        file_url: `/uploads/${file.filename}`,
+        creator_id: req.user.id, // Assurez-vous que l'utilisateur est bien authentifié
+        owner_address: "to-be-generated", // Générer plus tard
+        nft_token_id: "to-be-generated", // Générer plus tard
     });
 
-    return newIP;
-  } catch (error) {
-    console.error("Erreur lors de la création de l'IP:", error);
-    throw error; // Propager l'erreur au contrôleur
-  }
+    res.status(201).json(newIP);
+} catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur serveur" });
+}
 };
 
 

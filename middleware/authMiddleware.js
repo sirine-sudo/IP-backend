@@ -3,21 +3,28 @@ const asyncHandler = require("express-async-handler");
 const { User } = require("../models"); // ✅ Sequelize Model
 
 const authMiddleware = async (req, res, next) => {
-    console.log("Headers:", req.headers);
-    console.log("Body:", req.body);
-    try {
-      const token = req.headers.authorization?.split(" ")[1]; // Extract token from header
-      if (!token) return res.status(401).json({ message: "Unauthorized: No token" });
-  
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findByPk(decoded.id);
-      if (!req.user) return res.status(401).json({ message: "Unauthorized: Invalid user" });
-  
-      next();
-    } catch (error) {
-      res.status(401).json({ message: "Unauthorized: Invalid token" });
+    let token = req.header("Authorization");
+
+    if (!token) {
+        return res.status(401).json({ error: "Accès refusé. Aucun token fourni." });
     }
-  };
+
+    try {
+        if (token.startsWith("Bearer ")) {
+            token = token.split(" ")[1]; // 🔥 Supprime "Bearer "
+        } else {
+            return res.status(401).json({ error: "Format de token invalide." });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;  // ✅ Stocker l'utilisateur décodé
+        next();
+    } catch (err) {
+        console.error("Erreur JWT :", err);
+        res.status(401).json({ error: "Token invalide." });
+    }
+};
+
 const protect = asyncHandler(async (req, res, next) => {
     let token = req.headers.authorization;
 

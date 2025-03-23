@@ -72,29 +72,25 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 //   Refresh Token
-const refreshToken = asyncHandler(async (req, res) => {
-    try {
-        const { token } = req.body;
-        if (!token) return res.status(401).json({ message: "No refresh token provided" });
-
-        const user = await User.findOne({
-            where: { refresh_token: token },
-            attributes: ["id", "name", "email", "password", "role", "ethereum_address", "createdAt", "updatedAt", "refresh_token"]
-        });
-        
-        if (!user) return res.status(403).json({ message: "Invalid refresh token" });
-
-        jwt.verify(token, process.env.JWT_REFRESH_SECRET, async (err, decoded) => {
-            if (err) return res.status(403).json({ message: "Invalid refresh token" });
-
-            const accessToken = generateAccessToken(user);
-            res.json({ accessToken });
-        });
-    } catch (error) {
-        console.error("Error refreshing token:", error);
-        res.status(500).json({ message: "Internal server error" });
+const refreshToken = async (req, res) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(401).json({ error: "Aucun refresh token fourni." });
     }
-});
+  
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      const newAccessToken = jwt.sign(
+        { userId: decoded.userId },
+        process.env.JWT_SECRET,
+        { expiresIn: "15m" } // Nouveau token valide 15 minutes
+      );
+      
+      res.json({ accessToken: newAccessToken });
+    } catch (err) {
+      return res.status(403).json({ error: "Refresh token invalide." });
+    }
+  };
 
 
 //   Forgot Password
