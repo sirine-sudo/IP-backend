@@ -1,11 +1,11 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database"); // Assurez-vous que le chemin est correct
-const User = require("./User"); 
+const sequelize = require("../config/database");
+const User = require("./User");
 
 const IP = sequelize.define("IP", {
     id: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4, // Génération automatique d'un UUID
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
     title: {
@@ -31,7 +31,7 @@ const IP = sequelize.define("IP", {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: User, // Liaison avec le modèle User
+            model: User,
             key: "id",
         },
         onUpdate: "CASCADE",
@@ -42,11 +42,25 @@ const IP = sequelize.define("IP", {
         allowNull: false,
     },
     nft_token_id: {
-        type: DataTypes.STRING, // Peut être un BigInt on-chain, donc String pour éviter les erreurs
+        type: DataTypes.STRING,
         allowNull: false,
     },
+    royalty_percentage: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate: {
+            min: 0,
+            max: 100
+        }
+    },
+    views: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0, // Initialiser à 0
+    }
 }, {
-    timestamps: true, // Active `createdAt` et `updatedAt`
+    timestamps: true,
     tableName: "ips",
 });
 
