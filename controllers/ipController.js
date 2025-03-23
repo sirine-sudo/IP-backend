@@ -1,46 +1,43 @@
 const {  getAllIPs, getIPById } = require("../services/ipService");
 const { IP } = require("../models");  // 🔥 Import du modèle IP
+const uploadToIPFS = require("../utils/pinata");
+ const fs = require("fs");
 const createIPController = async (req, res) => {
   try {
-    console.log("Token décodé :", req.user);  // 🔥 Vérifie que `req.user` est bien rempli
-
     if (!req.user || !req.user.id) {
       return res.status(401).json({ error: "Utilisateur non authentifié." });
     }
 
-    const creator_id = req.user.id;
-    const { title, description, type, royalty_percentage } = req.body;
-
-    if (!title) return res.status(400).json({ error: "Le champ 'title' est requis." });
-    if (!description) return res.status(400).json({ error: "Le champ 'description' est requis." });
-    if (!type) return res.status(400).json({ error: "Le champ 'type' est requis." });
     if (!req.file) return res.status(400).json({ error: "Le fichier est requis." });
 
-    const file_url = `/uploads/${req.file.filename}`;
+    const { title, description, type, royalty_percentage } = req.body;
+    const creator_id = req.user.id;
 
-    // Ajout des valeurs par défaut pour éviter les erreurs
-    const ipfs_cid = req.body.ipfs_cid || "default-ipfs-cid";
-    const owner_address = req.body.owner_address || "default-owner-address";
-    const nft_token_id = req.body.nft_token_id || "default-token-id";
-    const views = req.body.views || 0;
+    // 🔥 Upload vers IPFS (Pinata)
+    const ipfsCid = await uploadToIPFS(req.file.path);
+    const file_url = `https://gateway.pinata.cloud/ipfs/${ipfsCid}`;
 
+    // Enregistrement en base de données
     const newIP = await IP.create({
       title,
       description,
       type,
       file_url,
+      ipfs_cid: ipfsCid,
+      owner_address: req.user.walletAddress || "unknown",
+      nft_token_id: "pending", // NFT pas encore minté
       creator_id,
-      ipfs_cid,
-      owner_address,
-      nft_token_id,
       royalty_percentage: royalty_percentage || 0,
-      views,
+      views: 0,
     });
+
+    // 🗑️ Supprimer le fichier temporaire
+    fs.unlinkSync(req.file.path);
 
     res.status(201).json(newIP);
   } catch (error) {
-    console.error("Erreur lors de la création de l'IP :", error);
-    res.status(500).json({ error: "Erreur lors de la création de l'IP", details: error.message });
+    console.error("Erreur lors de l'upload IP:", error);
+    res.status(500).json({ error: "Erreur lors de l'upload", details: error.message });
   }
 };
 
