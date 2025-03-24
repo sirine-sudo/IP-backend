@@ -165,7 +165,7 @@ const connectWallet = asyncHandler(async (req, res) => {
     }
 
     // Update user with Ethereum address
-    await pool.query("UPDATE users SET ethereum_address = $1 WHERE id = $2", [ethereum_address, userId]);
+    const result = await User.findOne({ where: { id: userId } });
 
     res.status(200).json({ message: "Ethereum wallet linked successfully!" });
 });

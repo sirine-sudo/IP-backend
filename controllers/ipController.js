@@ -2,46 +2,55 @@ const {  getAllIPs, getIPById } = require("../services/ipService");
 const { IP } = require("../models");  // 🔥 Import du modèle IP
 const uploadToIPFS = require("../utils/pinata");
  const fs = require("fs");
-const createIPController = async (req, res) => {
-  try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ error: "Utilisateur non authentifié." });
-    }
+ const { User } = require("../models");  // 🔥 Import du modèle User
 
-    if (!req.file) return res.status(400).json({ error: "Le fichier est requis." });
+ const createIPController = async (req, res) => {
+   try {
+     if (!req.user || !req.user.id) {
+       return res.status(401).json({ error: "Utilisateur non authentifié." });
+     }
+ 
+     if (!req.file) return res.status(400).json({ error: "Le fichier est requis." });
+ 
+     const { title, description, type, royalty_percentage } = req.body;
+     const creator_id = req.user.id;
+ 
+     // 🔥 Upload vers IPFS (Pinata)
+     const ipfsCid = await uploadToIPFS(req.file.path);
+     const file_url = `https://gateway.pinata.cloud/ipfs/${ipfsCid}`;
+ 
+     // Enregistrement en base de données
+     const newIP = await IP.create({
+       title,
+       description,
+       type,
+       file_url,
+       ipfs_cid: ipfsCid,
+       owner_address: req.user.walletAddress || "unknown",
+       nft_token_id: "pending",
+       creator_id,
+       royalty_percentage: royalty_percentage || 0,
+       views: 0,
+     });
+ 
+     // 🗑️ Supprimer le fichier temporaire
+     fs.unlinkSync(req.file.path);
+ 
+     // **🎯 Vérifier le nombre d'IPs et mettre à jour le rôle**
+     const userIPs = await IP.count({ where: { creator_id } });
 
-    const { title, description, type, royalty_percentage } = req.body;
-    const creator_id = req.user.id;
-
-    // 🔥 Upload vers IPFS (Pinata)
-    const ipfsCid = await uploadToIPFS(req.file.path);
-    const file_url = `https://gateway.pinata.cloud/ipfs/${ipfsCid}`;
-
-    // Enregistrement en base de données
-    const newIP = await IP.create({
-      title,
-      description,
-      type,
-      file_url,
-      ipfs_cid: ipfsCid,
-      owner_address: req.user.walletAddress || "unknown",
-      nft_token_id: "pending", // NFT pas encore minté
-      creator_id,
-      royalty_percentage: royalty_percentage || 0,
-      views: 0,
-    });
-
-    // 🗑️ Supprimer le fichier temporaire
-    fs.unlinkSync(req.file.path);
-
-    res.status(201).json(newIP);
-  } catch (error) {
-    console.error("Erreur lors de l'upload IP:", error);
-    res.status(500).json({ error: "Erreur lors de l'upload", details: error.message });
-  }
-};
-
-
+     if (userIPs > 1) {
+       await User.update({ role: "ip-owner" }, { where: { id: creator_id } });
+       console.log(`✅ Rôle mis à jour pour l'utilisateur ${creator_id} : ip-owner`);
+     }
+ 
+     res.status(201).json(newIP);
+   } catch (error) {
+     console.error("Erreur lors de l'upload IP:", error);
+     res.status(500).json({ error: "Erreur lors de l'upload", details: error.message });
+   }
+ };
+ 
 
 const getAllIPsController = async (req, res) => {
   try {
