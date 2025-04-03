@@ -6,6 +6,7 @@ const { authMiddleware } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 const router = express.Router();
 const ipController = require("../controllers/ipController");
+const { uploadMetadataJSON } = require("../controllers/ipfsController");
 
 // Multer Storage Configuration
 const storage = multer.diskStorage({
@@ -22,5 +23,6 @@ router.get("/", getAllIPsController);
 router.get("/:id", getIPByIdController);
 router.post("/ips", authMiddleware, upload.single("file"), createIPController);
 router.put("/:id/update-token", ipController.updateTokenId); 
+router.post("/metadata", uploadMetadataJSON);
 
 module.exports = router;

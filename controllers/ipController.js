@@ -53,25 +53,25 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
    }
  };
  
-
  const updateTokenId = async (req, res) => {
   try {
     const { nft_token_id, owner_address } = req.body;
     const { id } = req.params;
 
-    const updateFields = { nft_token_id };
-    if (owner_address) {
-      updateFields.owner_address = owner_address;
-    }
+    if (!nft_token_id) return res.status(400).json({ error: "tokenId manquant" });
 
-    const updated = await IP.update(updateFields, { where: { id } });
+    const updated = await IP.update(
+      { nft_token_id, owner_address },
+      { where: { id } }
+    );
 
     if (updated[0] === 0) {
       return res.status(404).json({ error: "IP non trouvée" });
     }
 
-    res.status(200).json({ message: "Mise à jour réussie", tokenId: nft_token_id, owner: owner_address });
+    res.status(200).json({ message: "Mise à jour réussie", tokenId: nft_token_id });
   } catch (error) {
+    console.error("Erreur update-token:", error);
     res.status(500).json({ error: error.message });
   }
 };
