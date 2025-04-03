@@ -58,7 +58,11 @@ const IP = sequelize.define("IP", {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0, // Initialiser à 0
-    }
+    },file_hash: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      }
+      
 }, {
     timestamps: true,
     tableName: "ips",

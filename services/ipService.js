@@ -32,7 +32,7 @@ const createIP = async function createIP(ipData) {
 const getAllIPs = async () => {
   try {
     return await IP.findAll({
-      attributes: ["id", "title", "description", "type", "ipfs_cid", "file_url", "owner_address", "views", "royalty_percentage"],
+     
     });
   } catch (error) {
     throw new Error("Error fetching IPs: " + error.message);
@@ -41,7 +41,7 @@ const getAllIPs = async () => {
 
 const getIPById = async (id) => {
   const ip = await IP.findByPk(id, {
-    attributes: ["id", "title", "description", "type", "ipfs_cid", "file_url", "owner_address", "views", "royalty_percentage"],
+    attributes: ["id", "title", "description", "type", "file_hash","ipfs_cid", "file_url", "owner_address", "views", "royalty_percentage"],
   });
 
   if (!ip) {

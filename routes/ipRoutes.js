@@ -1,10 +1,11 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
-const { createIPController, getAllIPsController, getIPByIdController } = require("../controllers/ipController");
+const { createIPController, getAllIPsController, getIPByIdController, updateTokenId } = require("../controllers/ipController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 const router = express.Router();
+const ipController = require("../controllers/ipController");
 
 // Multer Storage Configuration
 const storage = multer.diskStorage({
@@ -20,5 +21,6 @@ router.post("/", authMiddleware, upload.single("file"), createIPController); // 
 router.get("/", getAllIPsController);
 router.get("/:id", getIPByIdController);
 router.post("/ips", authMiddleware, upload.single("file"), createIPController);
+router.put("/:id/update-token", ipController.updateTokenId); 
 
 module.exports = router;

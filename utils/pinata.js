@@ -1,7 +1,16 @@
 const axios = require("axios");
 const FormData = require("form-data");
-const fs = require("fs");
+
 require("dotenv").config();
+const crypto = require("crypto");
+const fs = require("fs");
+
+function generateFileHash(filePath) {
+  const fileBuffer = fs.readFileSync(filePath);
+  const hashSum = crypto.createHash("sha256");
+  hashSum.update(fileBuffer);
+  return hashSum.digest("hex");
+}
 
 const uploadToIPFS = async (filePath) => {
   try {
@@ -25,4 +34,4 @@ const uploadToIPFS = async (filePath) => {
   }
 };
 
-module.exports = uploadToIPFS;
+module.exports = {uploadToIPFS,generateFileHash};
