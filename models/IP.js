@@ -45,6 +45,10 @@ const IP = sequelize.define("IP", {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    smart_contract_address: {   // ✅ AJOUTÉ
+        type: DataTypes.STRING,
+        allowNull: true,         // Peut être vide au début
+    },
     royalty_percentage: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -54,15 +58,10 @@ const IP = sequelize.define("IP", {
             max: 100
         }
     },
-    views: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0, // Initialiser à 0
-    },file_hash: {
+    file_hash: {
         type: DataTypes.STRING,
         allowNull: false,
-      }
-      
+    }
 }, {
     timestamps: true,
     tableName: "ips",

@@ -40,9 +40,7 @@ const getAllIPs = async () => {
 };
 
 const getIPById = async (id) => {
-  const ip = await IP.findByPk(id, {
-    attributes: ["id", "title", "description", "type", "file_hash","ipfs_cid", "file_url", "owner_address", "views", "royalty_percentage"],
-  });
+  const ip = await IP.findByPk(id); //   toute la table a retouner
 
   if (!ip) {
     throw new Error("IP non trouvée");
@@ -50,7 +48,6 @@ const getIPById = async (id) => {
 
   return ip;
 };
-
 
 
 module.exports = { createIP, getAllIPs, getIPById };

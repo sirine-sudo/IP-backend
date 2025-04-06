@@ -29,10 +29,10 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
        owner_address: req.user.walletAddress || "unknown",
        nft_token_id: "pending",
        file_hash: fileHash,
-
+       smart_contract_address: "",
        creator_id,
        royalty_percentage: royalty_percentage || 0,
-       views: 0,
+
      });
  
      // 🗑️ Supprimer le fichier temporaire
@@ -61,7 +61,7 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
     if (!nft_token_id) return res.status(400).json({ error: "tokenId manquant" });
 
     const updated = await IP.update(
-      { nft_token_id, owner_address },
+      { nft_token_id, owner_address,smart_contract_address },
       { where: { id } }
     );
 
