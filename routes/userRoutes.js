@@ -14,6 +14,7 @@ router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 router.post("/refresh-token", refreshToken);
 
+router.post("/connect-wallet", protect, connectWallet);
 //  Fix: Ensure `protect` is correctly passed as a middleware
 router.get("/profile", protect, getUserProfile); 
 

@@ -8,7 +8,8 @@ const editorRoutes = require("./routes/editor");
 const { User } = require("./models"); 
 const bcrypt = require("bcryptjs");    //  Pour hasher le mot de passe
 const fs = require("fs");
- 
+const whitelistRoutes = require("./routes/whitelistRoutes");
+
 dotenv.config();
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(cors());
 app.use("/api/users", userRoutes);
 app.use("/api/ips", ipRoutes);
 app.use("/api/editor", editorRoutes);
+app.use("/api/whitelist", whitelistRoutes);
 
 // 🔥 Créer les dossiers si n'existent pas
 if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
