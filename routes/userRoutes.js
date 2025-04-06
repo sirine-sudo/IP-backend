@@ -1,9 +1,10 @@
 const express = require("express");
-const { registerUser, loginUser,logoutUser, refreshToken, forgotPassword, resetPassword, getUserProfile } = require("../controllers/userController");
-const { protect } = require("../middleware/authMiddleware");
+const { registerUser, loginUser,logoutUser, refreshToken, forgotPassword, resetPassword, getUserProfile, promoteUser, deleteUser } = require("../controllers/userController");
+const { protect, isAdmin } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 const { connectWallet } = require("../controllers/userController");
+const { getAllUsers } = require("../services/userService");
 
 router.post("/connect-wallet", protect, connectWallet);
 
@@ -23,5 +24,11 @@ router.get("/ip-owner", protect, (req, res) => res.json({ message: "IP Owner acc
 // Password recovery
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+
+
+// Admin: 
+router.get("/admin/users", protect, isAdmin, getAllUsers);
+router.put("/admin/users/:id/promote", protect, isAdmin, promoteUser);
+router.delete("/admin/users/:id", protect, isAdmin, deleteUser);
 
 module.exports = router;

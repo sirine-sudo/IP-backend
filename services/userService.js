@@ -1,4 +1,4 @@
-const { User } = require("../models"); // ✅ Sequelize Model
+const { User } = require("../models"); 
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -71,7 +71,20 @@ const generateResetToken = async (email) => {
 
     return resetToken;
 };
-
+//  Admin : Voir tous les utilisateurs
+const getAllUsers = async (req, res) => {
+    try {
+      const users = await User.findAll({
+        attributes: ["id", "name", "email", "role", "ethereum_address"], // Ne pas envoyer password
+        order: [['createdAt', 'DESC']], // Plus récent d'abord
+      });
+      res.json(users);
+    } catch (error) {
+      console.error("Erreur getAllUsers:", error.message);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  };
+  
 
 module.exports = {
     generateAccessToken,
@@ -80,5 +93,5 @@ module.exports = {
     findUserByEmail,
     updateRefreshToken,
     clearRefreshToken,
-    generateResetToken,
+    generateResetToken,getAllUsers
 };
