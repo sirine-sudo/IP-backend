@@ -1,8 +1,8 @@
 const {  getAllIPs, getIPById } = require("../services/ipService");
-const { IP } = require("../models");  // 🔥 Import du modèle IP
+const { IP } = require("../models");  
 const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
  const fs = require("fs");
- const { User } = require("../models");  // 🔥 Import du modèle User
+ const { User } = require("../models");  
  
  const createIPController = async (req, res) => {
    try {
@@ -14,7 +14,7 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
  
      const { title, description, type, royalty_percentage } = req.body;
      const creator_id = req.user.id;
-     const fileHash = generateFileHash(req.file.path); // 🔑 Correction ici
+     const fileHash = generateFileHash(req.file.path);
      const ipfsCid = await uploadToIPFS(req.file.path);
      
      const file_url = `https://gateway.pinata.cloud/ipfs/${ipfsCid}`;
@@ -35,16 +35,15 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
 
      });
  
-     // 🗑️ Supprimer le fichier temporaire
+     //  Supprimer le fichier temporaire
      fs.unlinkSync(req.file.path);
  
-     // **🎯 Vérifier le nombre d'IPs et mettre à jour le rôle**
+     //  Vérifier le nombre d'IPs et mettre à jour le rôle
      const userIPs = await IP.count({ where: { creator_id } });
 
      if (userIPs > 1) {
        await User.update({ role: "ip-owner" }, { where: { id: creator_id } });
-       console.log(`✅ Rôle mis à jour pour l'utilisateur ${creator_id} : ip-owner`);
-     }
+      }
  
      res.status(201).json(newIP);
    } catch (error) {
@@ -52,7 +51,28 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
      res.status(500).json({ error: "Erreur lors de l'upload", details: error.message });
    }
  };
- 
+ const updateIPMetadata = async (req, res) => {
+  try {
+    const { title, description, royalty_percentage } = req.body;  
+    const { id } = req.params;
+
+    const updated = await IP.update(
+      { title, description, royalty_percentage },
+      { where: { id } }
+    );
+
+    if (updated[0] === 0) {
+      return res.status(404).json({ error: "IP non trouvée" });
+    }
+
+    res.status(200).json({ message: "Metadonnées mises à jour avec succès" });
+  } catch (error) {
+    console.error("Erreur update-metadata:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
  const updateTokenId = async (req, res) => {
   try {
     const { nft_token_id, owner_address,smart_contract_address } = req.body;
@@ -95,4 +115,4 @@ const getIPByIdController = async (req, res) => {
   }
 };
 
-module.exports = { updateTokenId,createIPController, getAllIPsController, getIPByIdController };
+module.exports = { updateTokenId,createIPController, getAllIPsController, getIPByIdController ,updateIPMetadata};
