@@ -97,6 +97,7 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
 };
 
 
+
 const getAllIPsController = async (req, res) => {
   try {
     const ips = await getAllIPs();
@@ -114,5 +115,21 @@ const getIPByIdController = async (req, res) => {
     return res.status(404).json({ message: error.message });
   }
 };
+//  Fonction pour supprimer un IP par ID
+const deleteIP = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-module.exports = { updateTokenId,createIPController, getAllIPsController, getIPByIdController ,updateIPMetadata};
+    const deleted = await IP.destroy({ where: { id } });
+
+    if (deleted) {
+      return res.status(200).json({ message: " IP supprimée avec succès." });
+    } else {
+      return res.status(404).json({ error: " IP non trouvée." });
+    }
+  } catch (error) {
+    console.error("Erreur lors de la suppression :", error);
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+};
+module.exports = { updateTokenId,createIPController, getAllIPsController, getIPByIdController ,updateIPMetadata, deleteIP};
