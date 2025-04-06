@@ -45,7 +45,7 @@ const IP = sequelize.define("IP", {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    smart_contract_address: {   // ✅ AJOUTÉ
+    smart_contract_address: {  
         type: DataTypes.STRING,
         allowNull: true,         // Peut être vide au début
     },
