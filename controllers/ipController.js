@@ -55,7 +55,7 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
  
  const updateTokenId = async (req, res) => {
   try {
-    const { nft_token_id, owner_address } = req.body;
+    const { nft_token_id, owner_address,smart_contract_address } = req.body;
     const { id } = req.params;
 
     if (!nft_token_id) return res.status(400).json({ error: "tokenId manquant" });
