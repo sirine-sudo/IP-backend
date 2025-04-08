@@ -32,7 +32,7 @@ const checkWhitelistStatus = async (req, res) => {
     const provider = new ethers.JsonRpcProvider(process.env.API_URL);
     const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI.abi, provider);
 
-    const isWhitelisted = await contract.isWhitelisted(userAddress);  /
+    const isWhitelisted = await contract.isWhitelisted(userAddress);  
     res.json({ isWhitelisted });
   } catch (error) {
     console.error(error);

@@ -26,7 +26,7 @@ const { uploadToIPFS, generateFileHash } = require("../utils/pinata");
        type,
        file_url,
        ipfs_cid: ipfsCid,
-       owner_address: req.user.walletAddress || "unknown",
+       owner_address: req.user.walletAddress,
        nft_token_id: "pending",
        file_hash: fileHash,
        smart_contract_address: "",
