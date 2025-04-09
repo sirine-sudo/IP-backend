@@ -26,5 +26,5 @@ router.put("/:id/update-token", ipController.updateTokenId);
 router.put("/:id/update-metadata", ipController.updateIPMetadata); 
 router.post("/metadata", uploadMetadataJSON);
 router.delete("/:id", ipController.deleteIP);
-
+router.put("/:id/sale",  ipController.updateSaleStatus);
 module.exports = router;
