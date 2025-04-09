@@ -45,7 +45,7 @@ const IP = sequelize.define("IP", {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    smart_contract_address: {  
+    smart_contract_address: {
         type: DataTypes.STRING,
         allowNull: true,         // Peut être vide au début
     },
@@ -61,7 +61,19 @@ const IP = sequelize.define("IP", {
     file_hash: {
         type: DataTypes.STRING,
         allowNull: false,
-    }
+    }, is_for_sale: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    price: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    },
+    preferred_creator_name: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+
 }, {
     timestamps: true,
     tableName: "ips",
