@@ -1,30 +1,29 @@
 const express = require("express");
-const multer = require("multer");
-const path = require("path");
-const { createIPController, getAllIPsController, getIPByIdController, updateTokenId,updateIPMetadata ,deleteIP} = require("../controllers/ipController");
+const { 
+  createIPController, 
+  getAllIPsController, 
+  getIPByIdController, 
+  updateTokenId, 
+  updateIPMetadata, 
+  deleteIP, 
+  updateSaleStatus, 
+  getMyIPsController 
+} = require("../controllers/ipController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
-const router = express.Router();
-const ipController = require("../controllers/ipController");
 const { uploadMetadataJSON } = require("../controllers/ipfsController");
 
-// Multer Storage Configuration
-const storage = multer.diskStorage({
-  destination: "./uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-
+const router = express.Router();
 
 // Routes
-router.post("/", authMiddleware, upload.single("file"), createIPController); // Now supports file upload
+router.post("/", authMiddleware, upload.single("file"), createIPController); 
 router.get("/", getAllIPsController);
+router.get("/my-ips", authMiddleware, getMyIPsController);
 router.get("/:id", getIPByIdController);
-router.post("/ips", authMiddleware, upload.single("file"), createIPController);
-router.put("/:id/update-token", ipController.updateTokenId); 
-router.put("/:id/update-metadata", ipController.updateIPMetadata); 
+router.put("/:id/update-token", updateTokenId); 
+router.put("/:id/update-metadata", updateIPMetadata); 
 router.post("/metadata", uploadMetadataJSON);
-router.delete("/:id", ipController.deleteIP);
-router.put("/:id/sale",  ipController.updateSaleStatus);
+router.delete("/:id", deleteIP);
+router.put("/:id/sale", updateSaleStatus);
+
 module.exports = router;

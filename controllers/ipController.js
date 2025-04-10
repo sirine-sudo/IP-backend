@@ -181,6 +181,25 @@ const deleteIP = async (req, res) => {
     console.error("Erreur update-sale-status:", error);
     res.status(500).json({ error: error.message });
   }
+};// Ajoute dans ton contrôleur
+
+const getMyIPsController = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Utilisateur non authentifié." });
+    }
+
+    const myIps = await IP.findAll({
+      where: { creator_id: req.user.id },
+      order: [['createdAt', 'DESC']]  // Optionnel : pour voir les plus récents d'abord
+    });
+
+    return res.status(200).json(myIps);
+  } catch (error) {
+    console.error("Erreur get-my-ips:", error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
-module.exports = { updateTokenId, createIPController, getAllIPsController, getIPByIdController, updateIPMetadata, deleteIP, updateSaleStatus };
+
+module.exports = { updateTokenId, createIPController, getAllIPsController, getIPByIdController, updateIPMetadata, deleteIP, updateSaleStatus,getMyIPsController};
