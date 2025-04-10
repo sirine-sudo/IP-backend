@@ -6,27 +6,38 @@ const { User } = require("../models");
 
 const createIPController = async (req, res) => {
   try {
+    console.log("➡️ Début création IP");  // 1
+
     if (!req.user || !req.user.id) {
+      console.log("❌ Utilisateur non authentifié");
       return res.status(401).json({ error: "Utilisateur non authentifié." });
     }
 
-    if (!req.file) return res.status(400).json({ error: "Le fichier est requis." });
+    if (!req.file) {
+      console.log("❌ Aucun fichier envoyé");
+      return res.status(400).json({ error: "Le fichier est requis." });
+    }
+
+    console.log("✅ Utilisateur connecté :", req.user);  // 2
+    console.log("✅ Fichier reçu :", req.file.originalname);  // 3
 
     const { title, description, type, royalty_percentage, price, preferred_creator_name } = req.body;
     const creator_id = req.user.id;
     const fileHash = generateFileHash(req.file.path);
+    console.log("✅ Hash du fichier généré :", fileHash);  // 4
+
     const ipfsCid = await uploadToIPFS(req.file.path);
+    console.log("✅ Fichier uploadé sur IPFS. CID :", ipfsCid);  // 5
 
     const file_url = `https://gateway.pinata.cloud/ipfs/${ipfsCid}`;
 
-    // Enregistrement en base de données
     const newIP = await IP.create({
       title,
       description,
       type,
       file_url,
       ipfs_cid: ipfsCid,
-      owner_address: req.user.walletAddress || "Pas encore minté",
+      owner_address: req.user.ethereum_address || "Pas encore minté",
       nft_token_id: "pending",
       file_hash: fileHash,
       smart_contract_address: "",
@@ -37,22 +48,40 @@ const createIPController = async (req, res) => {
       preferred_creator_name: preferred_creator_name || "",
     });
 
-    //  Supprimer le fichier temporaire
-    fs.unlinkSync(req.file.path);
+    console.log("✅ Nouvelle IP enregistrée :", newIP.id);  // 6
 
-    //  Vérifier le nombre d'IPs et mettre à jour le rôle
+    fs.unlinkSync(req.file.path);
+    console.log("🧹 Fichier temporaire supprimé");  // 7
+
     const userIPs = await IP.count({ where: { creator_id } });
+    console.log(`ℹ️ L'utilisateur a maintenant ${userIPs} IP(s)`);  // 8
 
     if (userIPs > 1) {
       await User.update({ role: "ip-owner" }, { where: { id: creator_id } });
+      console.log("✅ Rôle de l'utilisateur mis à jour : ip-owner");  // 9
     }
 
-    res.status(201).json(newIP);
+    const user = await User.findByPk(creator_id, {
+      attributes: ["id","email", "ethereum_address"],
+    });
+
+
+    const formattedUser = {
+      id: user.id,
+      email: user.email,
+      ethereum_address: user.ethereum_address || "Non connecté",
+    };
+
+    console.log("📤 Envoi de la réponse IP + User");  // 11
+    res.status(201).json({ ip: newIP, user: formattedUser });
+
   } catch (error) {
-    console.error("Erreur lors de l'upload IP:", error);
+    console.error("🚨 Erreur lors de l'upload IP :", error);
     res.status(500).json({ error: "Erreur lors de l'upload", details: error.message });
   }
 };
+
+
 const updateIPMetadata = async (req, res) => {
   try {
     const { title, description, royalty_percentage } = req.body;
