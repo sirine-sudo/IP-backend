@@ -1,20 +1,21 @@
 // IP-backend/services/parser.service.js
-const path = require("path");
 const fs = require("fs/promises");
+const path = require("path");
 
-// ⚠️ adapte le chemin vers TON parser MCO
+// === Parser officiel ISO ===
 const { getContractFromMCO } = require(
   path.resolve(__dirname, "../../ISO IEC 21000-23/MPEG-21 MCO Parser/index.js")
 );
 
 async function parseTTLService(ttlFilePath) {
-  // 1) Lire le contenu du .ttl
   const ttlText = await fs.readFile(ttlFilePath, "utf8");
-
-  // 2) Parser le CONTENU (pas le chemin)
   const parsed = await getContractFromMCO(ttlText);
-
-  return parsed;
+  if (!parsed || typeof parsed !== "object") {
+    const err = new Error("MCO parse error: empty result");
+    err.code = "PARSER_MCO";
+    throw err;
+  }
+  return parsed; // { contracts: [...] }
 }
 
 module.exports = { parseTTLService };

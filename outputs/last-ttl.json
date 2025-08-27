@@ -1,0 +1,49 @@
+{
+  "@context": {
+    "mco": "http://mpeg.org/mco#",
+    "ex": "http://example.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  },
+  "@graph": [
+    {
+      "@id": "urn:mpeg:mco:contract:001",
+      "@type": "mco:Contract",
+      "mco:identifier": "urn:mpeg:mco:contract:001",
+      "mco:tokenName": "MCO-NFT-tesss",
+      "mco:tokenSymbol": "MCO",
+      "mco:contentUri": "ipfs://bafy.../contract.json",
+      "mco:contentHash": "0x",
+      "mco:deonticExpressions": {
+        "@list": []
+      },
+      "mco:objects": {
+        "@list": []
+      },
+      "mco:relatedContracts": {
+        "@list": []
+      },
+      "mco:relations": {
+        "@list": []
+      },
+      "mco:hasParty": [
+        {
+          "@id": "ex:party1"
+        },
+        {
+          "@id": "ex:party2"
+        }
+      ],
+      "mco:status": "draft"
+    },
+    {
+      "@id": "ex:party1",
+      "@type": "mco:Party",
+      "mco:address": "0x0000000000000000000000000000000000000001"
+    },
+    {
+      "@id": "ex:party2",
+      "@type": "mco:Party",
+      "mco:address": "0x0000000000000000000000000000000000000002"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+@prefix mco: <http://mpeg.org/mco#> .
+@prefix ex:  <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# =======================
+# Contrat principal
+# =======================
+<urn:mpeg:mco:contract:001> a mco:Contract ;
+  mco:tokenName "MCO-NFT-test-1" ;
+  mco:tokenSymbol "MCO" ;
+  mco:contentUri "ipfs://bafy.../contract.json" ;
+  mco:contentHash "0x" ;
+  mco:hasParty ex:party1 ;
+  mco:hasParty ex:party2 ;
+  mco:status "draft" .
+
+# =======================
+# Parties
+# =======================
+ex:party1 a mco:Party ;
+  mco:address "0x0000000000000000000000000000000000000001" .
+
+ex:party2 a mco:Party ;
+  mco:address "0x0000000000000000000000000000000000000002" .
